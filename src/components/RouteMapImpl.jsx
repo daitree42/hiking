@@ -32,14 +32,16 @@ function FitBounds({ stops }) {
 
 export default function RouteMapImpl({ stops, color = "#8B2020" }) {
   if (!stops || stops.length === 0) return null;
-  const center = [stops[0]?.lat || 23.13, stops[0]?.lng || 113.26];
-  const positions = stops.map(s => [s.lat, s.lng]);
+  const validStops = stops.filter(s => s.lat && s.lng);
+  if (validStops.length === 0) return null;
+  const center = [validStops[0].lat, validStops[0].lng];
+  const positions = validStops.map(s => [s.lat, s.lng]);
   return (
     <MapContainer center={center} zoom={13} style={{ height: 260, width: "100%", borderRadius: 4 }} zoomControl={false} scrollWheelZoom={false} dragging={false}>
       <TileLayer attribution='&copy; OSM' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      <FitBounds stops={stops} />
+      <FitBounds stops={validStops} />
       <Polyline positions={positions} pathOptions={{ color, weight: 2, opacity: 0.6 }} />
-      {stops.map((s, i) => (
+      {validStops.map((s, i) => (
         <Marker key={s.id || i} position={[s.lat, s.lng]} icon={numberedIcon(i + 1, color)}>
           <Popup><strong>{s.name}</strong><br />{s.highlight}</Popup>
         </Marker>

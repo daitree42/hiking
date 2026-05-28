@@ -23,10 +23,13 @@ const SYSTEM_PROMPT = `你是广州徒步路线设计专家，熟悉广州所有
       "address": "地址",
       "description": "80-120字历史介绍",
       "highlight": "核心亮点",
-      "walkFromPrev": "步行X分钟（第一站为空）"
+      "walkFromPrev": "步行X分钟（第一站为空）",
+      "lat": 23.1234,
+      "lng": 113.1234
     }
   ]
-}`;
+}
+坐标要使用真实地点的经纬度，lat 纬度（广州约23.1），lng 经度（广州约113.2）。`;
 
 function parseRoute(text) {
   const jsonMatch = text.match(/\{[\s\S]*\}/);
