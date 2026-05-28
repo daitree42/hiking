@@ -28,7 +28,7 @@ export default function App() {
   return (
     <div className="app">
       <header style={{ textAlign:"center", padding:"36px 0 6px", borderBottom:"1px solid rgba(26,18,8,0.1)", marginBottom:0 }}>
-        <h1 style={{ fontSize:22, fontWeight:700, letterSpacing:"0.06em", margin:0 }}>广州徒步</h1>
+        <h1 style={{ fontSize:22, fontWeight:700, letterSpacing:"0.06em", margin:0 }}>城市·徒步线路</h1>
         <p style={{ fontSize:12, color:"#8A7E72", marginTop:1 }}>用脚步丈量两千年</p>
       </header>
 
