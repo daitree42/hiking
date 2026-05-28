@@ -1,72 +1,80 @@
 import { useState, useEffect } from "react";
-import Timeline from "./Timeline";
+import SectionLabel from "./SectionLabel";
+import StopTimeline from "./Timeline";
 
 export default function MyRoutesTab() {
-  const [savedRoutes, setSavedRoutes] = useState([]);
+  const [routes, setRoutes] = useState([]);
 
-  function refresh() {
-    const list = window.storage?.list("route:") || [];
-    setSavedRoutes(list);
+  async function refresh() {
+    const { keys } = await window.storage.list("route:");
+    const items = [];
+    for (const k of keys) {
+      const r = await window.storage.get(k);
+      if (r) items.push({ storageKey: k, ...r.value });
+    }
+    items.sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt));
+    setRoutes(items);
   }
 
   useEffect(() => { refresh(); }, []);
 
-  function handleDelete(key) {
-    window.storage?.remove(key);
+  async function handleDelete(key) {
+    await window.storage.delete(key);
     refresh();
   }
 
   function handleExport(route) {
-    const blob = new Blob([JSON.stringify(route, null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify(route, null, 2)], { type:"application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url;
-    a.download = `${route.name || "route"}.json`;
-    a.click();
+    a.href = url; a.download = `${route.name || "route"}.json`; a.click();
     URL.revokeObjectURL(url);
   }
 
-  if (savedRoutes.length === 0) {
+  if (routes.length === 0) {
     return (
-      <div className="tab-content my-routes-tab">
-        <div className="empty-state">
-          <p>还没有保存的线路</p>
-          <span>去探索一条吧</span>
-        </div>
+      <div style={{ textAlign:"center", padding:"80px 20px", color:"#8A7E72" }}>
+        <p style={{ fontSize:15, margin:"0 0 4px" }}>还没有保存的线路</p>
+        <span style={{ fontSize:13 }}>去探索一条吧</span>
       </div>
     );
   }
 
   return (
-    <div className="tab-content my-routes-tab">
-      <h2 className="section__title">我的线路</h2>
-      <div className="saved-list">
-        {savedRoutes.map(({ key, data }) => {
-          const route = data.route;
-          const savedAt = data.savedAt ? new Date(data.savedAt).toLocaleDateString("zh-CN") : "";
+    <div>
+      <SectionLabel>我的线路</SectionLabel>
+      <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
+        {routes.map(item => {
+          const r = item.route || item;
+          const savedAt = item.savedAt ? new Date(item.savedAt).toLocaleDateString("zh-CN") : "";
+          const source = item.source || "ai";
+          const c = r.color || "#8B2020";
           return (
-            <div key={key} className="saved-item">
-              <div className="saved-item__header">
-                <h3 className="saved-item__name">{route.name}</h3>
-                <span className={`saved-item__tag ${data.source === "ai" ? "tag--ai" : "tag--preset"}`}>
-                  {data.source === "ai" ? "AI生成" : "精选"}
+            <div key={item.storageKey} style={{ background:"#FAF7F2", border:"1px solid rgba(26,18,8,0.1)", borderRadius:6, overflow:"hidden" }}>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"14px 16px 0" }}>
+                <h3 style={{ fontSize:15, fontWeight:700, margin:0 }}>{r.name}</h3>
+                <span style={{
+                  fontSize:10, padding:"2px 7px", borderRadius:3, fontWeight:600, fontFamily:"sans-serif",
+                  ...(source === "ai" ? { background:`${c}12`, color } : { background:"rgba(26,18,8,0.06)", color:"#8A7E72" }),
+                }}>
+                  {source === "ai" ? "AI生成" : "精选"}
                 </span>
               </div>
-              <div className="saved-item__meta">
-                <span>{route.distance}</span>
-                <span className="dot">·</span>
-                <span>{savedAt}</span>
+              <div style={{ display:"flex", gap:4, fontSize:11, color:"#8A7E72", padding:"4px 16px 0" }}>
+                <span>{r.distance}</span><span style={{ opacity:0.3 }}>·</span><span>{savedAt}</span>
               </div>
-              <div className="saved-item__stops">
-                <Timeline stops={route.stops} color={route.color || "#8B2020"} />
+              <div style={{ padding:"2px 16px 8px", marginTop:4 }}>
+                <StopTimeline stops={r.stops} color={c} />
               </div>
-              <div className="saved-item__actions">
-                <button className="saved-item__btn saved-item__btn--export" onClick={() => handleExport(route)}>
-                  导出 JSON
-                </button>
-                <button className="saved-item__btn saved-item__btn--delete" onClick={() => handleDelete(key)}>
-                  删除
-                </button>
+              <div style={{ display:"flex", gap:8, justifyContent:"flex-end", padding:"0 16px 14px" }}>
+                <button onClick={() => handleExport(r)} style={{
+                  padding:"5px 12px", background:"transparent", border:"1px solid rgba(26,18,8,0.12)",
+                  borderRadius:4, fontSize:12, fontFamily:"inherit", cursor:"pointer", color:"#1A1208",
+                }}>导出 JSON</button>
+                <button onClick={() => handleDelete(item.storageKey)} style={{
+                  padding:"5px 12px", background:"transparent", border:"1px solid rgba(26,18,8,0.12)",
+                  borderRadius:4, fontSize:12, fontFamily:"inherit", cursor:"pointer", color:"#c62828",
+                }}>删除</button>
               </div>
             </div>
           );

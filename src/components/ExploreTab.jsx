@@ -1,23 +1,18 @@
-import { ROUTES } from "../data/routes";
+import { PRESET_ROUTES } from "../data/routes";
+import SectionLabel from "./SectionLabel";
 import RouteCard from "./RouteCard";
 import AiGenerator from "./AiGenerator";
 
 export default function ExploreTab({ onSave }) {
   return (
-    <div className="tab-content explore-tab">
-      <section className="section">
-        <h2 className="section__title">精选路线</h2>
-        <div className="routes-list">
-          {Object.values(ROUTES).map((route) => (
-            <RouteCard key={route.id} route={route} />
-          ))}
-        </div>
-      </section>
+    <div>
+      <SectionLabel>精选路线</SectionLabel>
+      <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+        {PRESET_ROUTES.map(r => <RouteCard key={r.id} route={r} />)}
+      </div>
 
-      <section className="section">
-        <h2 className="section__title">AI 定制路线</h2>
-        <AiGenerator onSave={onSave} />
-      </section>
+      <SectionLabel>AI 定制路线</SectionLabel>
+      <AiGenerator onSave={onSave} />
     </div>
   );
 }

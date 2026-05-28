@@ -1,28 +1,24 @@
-// window.storage API — localStorage 适配器
-// set(key, value) / list(prefix) / remove(key)
-
-const PREFIX = "hiking_route_";
+// window.storage API — async localStorage 适配器
 
 window.storage = {
-  set(key, value) {
+  async set(key, value) {
     localStorage.setItem(key, typeof value === "string" ? value : JSON.stringify(value));
   },
-  list(prefix) {
-    const results = [];
+  async list(prefix) {
+    const keys = [];
     for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith(prefix)) {
-        try {
-          const data = JSON.parse(localStorage.getItem(key));
-          results.push({ key, data });
-        } catch {
-          // skip invalid entries
-        }
-      }
+      const k = localStorage.key(i);
+      if (k && k.startsWith(prefix)) keys.push(k);
     }
-    return results.sort((a, b) => b.data.savedAt - a.data.savedAt);
+    return { keys };
   },
-  remove(key) {
+  async get(key) {
+    const val = localStorage.getItem(key);
+    if (!val) return null;
+    // 避免双重 JSON.parse
+    try { return { value: JSON.parse(val) }; } catch { return { value: val }; }
+  },
+  async delete(key) {
     localStorage.removeItem(key);
   },
 };

@@ -31,15 +31,7 @@ const SYSTEM_PROMPT = `你是广州徒步路线设计专家，熟悉广州所有
 function parseRoute(text) {
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) return null;
-  const route = JSON.parse(jsonMatch[0]);
-  // 兼容 walkFromPrev / walk 字段
-  if (route.stops) {
-    route.stops = route.stops.map((s, i) => ({
-      ...s,
-      walk: s.walk || s.walkFromPrev || (i === 0 ? "" : "步行 15 分钟"),
-    }));
-  }
-  return route;
+  return JSON.parse(jsonMatch[0]);
 }
 
 export default function AiGenerator({ onSave }) {
@@ -53,7 +45,6 @@ export default function AiGenerator({ onSave }) {
     setLoading(true);
     setError("");
     setPreview(null);
-
     try {
       const res = await fetch("https://lingering-dream-748d.fuyrenoiu.workers.dev/", {
         method: "POST",
@@ -78,58 +69,69 @@ export default function AiGenerator({ onSave }) {
     }
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (!preview) return;
-    onSave(preview);
+    await onSave(preview);
     setPreview(null);
     setPrompt("");
   }
 
   return (
-    <div className="ai-gen">
-      <div className="ai-gen__header">
-        <h3 className="ai-gen__title">AI 定制路线</h3>
-        <p className="ai-gen__desc">描述你的偏好，自动生成一条专属徒步路线</p>
-      </div>
+    <div style={{ background:"#FAF7F2", border:"1px solid rgba(26,18,8,0.1)", borderRadius:6, padding:18 }}>
+      <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, color:"#8B2020", marginBottom:2 }}>AI 定制路线</div>
+      <p style={{ fontSize:12, color:"#8A7E72", margin:"0 0 10px" }}>描述你的偏好，自动生成一条专属路线</p>
 
-      <div className="ai-gen__row">
+      <div style={{ display:"flex", gap:8 }}>
         <input
-          className="ai-gen__input"
-          type="text"
-          placeholder="例如：想看广州的寺庙和古建筑，从荔湾出发"
           value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
+          onChange={e => setPrompt(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && handleGenerate()}
           disabled={loading}
+          placeholder="例如：我想看寺庙和古建筑，从荔湾出发"
+          style={{
+            flex:1, padding:"9px 12px", border:"1px solid rgba(26,18,8,0.12)", borderRadius:4,
+            fontSize:13, fontFamily:"inherit", background:"#F5F0E8", color:"#1A1208", outline:"none",
+          }}
         />
-        <button className="ai-gen__btn" onClick={handleGenerate} disabled={loading || !prompt.trim()}>
+        <button
+          onClick={handleGenerate}
+          disabled={loading || !prompt.trim()}
+          style={{
+            padding:"9px 20px", background:"#8B2020", color:"#fff", border:"none", borderRadius:4,
+            fontSize:13, fontFamily:"inherit", fontWeight:600, cursor:"pointer", whiteSpace:"nowrap",
+            opacity: (loading || !prompt.trim()) ? 0.35 : 1,
+          }}
+        >
           {loading ? "生成中…" : "生成"}
         </button>
       </div>
 
-      {error && <p className="ai-gen__error">⚠ {error}</p>}
+      {error && <p style={{ color:"#c62828", fontSize:12, marginTop:8 }}>⚠ {error}</p>}
 
       {preview && (
-        <div className="ai-preview">
-          <div className="ai-preview__header">
-            <h4 className="ai-preview__name">{preview.name}</h4>
-            <p className="ai-preview__sub">{preview.subtitle}</p>
-            <div className="ai-preview__meta">
-              <span>{preview.distance}</span>
-              <span className="dot">·</span>
-              <span>{preview.duration}</span>
-              <span className="dot">·</span>
-              <span>{preview.difficulty}</span>
-            </div>
+        <div style={{ marginTop:14, padding:14, background:"#F5F0E8", border:"1px solid rgba(26,18,8,0.1)", borderRadius:6 }}>
+          <div style={{ fontSize:15, fontWeight:700 }}>{preview.name}</div>
+          <div style={{ fontSize:12, color:"#8A7E72", marginTop:1 }}>{preview.subtitle}</div>
+          <div style={{ display:"flex", gap:4, fontSize:11, color:"#8A7E72", marginTop:4 }}>
+            <span>{preview.distance}</span><span style={{ opacity:0.3 }}>·</span>
+            <span>{preview.duration}</span><span style={{ opacity:0.3 }}>·</span>
+            <span>{preview.difficulty}</span>
           </div>
-          <ul className="ai-preview__stops">
-            {preview.stops?.map((s) => (
-              <li key={s.id}>
+          <ul style={{ listStyle:"none", display:"flex", flexWrap:"wrap", gap:5, marginTop:8, padding:0 }}>
+            {preview.stops?.map(s => (
+              <li key={s.id} style={{ fontSize:11, padding:"2px 7px", background:"#FAF7F2", border:"1px solid rgba(26,18,8,0.08)", borderRadius:3 }}>
                 {s.typeIcon} {s.name}
               </li>
             ))}
           </ul>
-          <button className="ai-preview__save" onClick={handleSave}>
+          <button
+            onClick={handleSave}
+            style={{
+              marginTop:12, padding:"9px", width:"100%", background:"#8B2020", color:"#fff",
+              border:"none", borderRadius:4, fontSize:13, fontFamily:"inherit", fontWeight:600,
+              cursor:"pointer",
+            }}
+          >
             保存到我的线路
           </button>
         </div>
