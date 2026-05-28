@@ -38,7 +38,7 @@ export default function RouteMapImpl({ stops, color = "#8B2020" }) {
   const positions = validStops.map(s => [s.lat, s.lng]);
   return (
     <MapContainer center={center} zoom={13} style={{ height: 260, width: "100%", borderRadius: 4 }} zoomControl={false} scrollWheelZoom={false} dragging={false}>
-      <TileLayer attribution='&copy; OSM' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <TileLayer attribution='&copy; 高德地图' url="https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}" />
       <FitBounds stops={validStops} />
       <Polyline positions={positions} pathOptions={{ color, weight: 2, opacity: 0.6 }} />
       {validStops.map((s, i) => (
