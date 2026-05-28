@@ -1,24 +1,35 @@
 // window.storage API — async localStorage 适配器
 
+function ls() {
+  try { return localStorage; } catch { return null; }
+}
+
 window.storage = {
   async set(key, value) {
-    localStorage.setItem(key, typeof value === "string" ? value : JSON.stringify(value));
+    const s = ls();
+    if (!s) return;
+    s.setItem(key, typeof value === "string" ? value : JSON.stringify(value));
   },
   async list(prefix) {
+    const s = ls();
+    if (!s) return { keys: [] };
     const keys = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
+    for (let i = 0; i < s.length; i++) {
+      const k = s.key(i);
       if (k && k.startsWith(prefix)) keys.push(k);
     }
     return { keys };
   },
   async get(key) {
-    const val = localStorage.getItem(key);
+    const s = ls();
+    if (!s) return null;
+    const val = s.getItem(key);
     if (!val) return null;
-    // 避免双重 JSON.parse
     try { return { value: JSON.parse(val) }; } catch { return { value: val }; }
   },
   async delete(key) {
-    localStorage.removeItem(key);
+    const s = ls();
+    if (!s) return;
+    s.removeItem(key);
   },
 };
