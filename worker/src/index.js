@@ -1,19 +1,32 @@
 // Cloudflare Worker: 代理 DeepSeek API 调用
 // 部署后设置 DEEPSEEK_API_KEY 环境变量
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
 export default {
   async fetch(request, env) {
+    // 处理 CORS 预检请求
+    if (request.method === "OPTIONS") {
+      return new Response(null, { headers: CORS_HEADERS });
+    }
+
     if (request.method !== "POST") {
       return new Response("Method not allowed", { status: 405 });
     }
 
     const apiKey = env.DEEPSEEK_API_KEY;
     if (!apiKey) {
-      return new Response("Server configuration error", { status: 500 });
+      return new Response(
+        JSON.stringify({ error: "DEEPSEEK_API_KEY 未设置" }),
+        { status: 500, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } }
+      );
     }
 
     try {
-      // 前端发来的是 Anthropic 格式，需要转为 OpenAI/DeepSeek 格式
       const body = await request.json();
 
       // 转换 messages：Anthropic 的 system 字段 → 作为第一条 system message
@@ -43,7 +56,7 @@ export default {
 
       const data = await response.json();
 
-      // 将 DeepSeek 响应转回 Anthropic 格式，前端无须改动
+      // 将 DeepSeek 响应转回 Anthropic 格式
       const anthropicResponse = {
         content: [
           {
@@ -53,12 +66,12 @@ export default {
       };
 
       return new Response(JSON.stringify(anthropicResponse), {
-        headers: { "Content-Type": "application/json" },
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
       });
     } catch (err) {
       return new Response(JSON.stringify({ error: err.message }), {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
       });
     }
   },
