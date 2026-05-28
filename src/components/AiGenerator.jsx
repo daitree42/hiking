@@ -129,7 +129,7 @@ export default function AiGenerator({ onSave }) {
 
     // 先尝试 Cloudflare Worker / DeepSeek API
     try {
-      const res = await fetch("https://lingering-dream-748d.fuyrenoiu.workers.dev/", {
+      const res = await fetch("https://hiking-ai.fuyrenoiu.workers.dev/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
