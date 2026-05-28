@@ -42,7 +42,7 @@ export default function AiGenerator({ onRouteGenerated }) {
 }`;
 
     try {
-      const response = await fetch("https://hiking-ai-proxy.daitree42.workers.dev", {
+      const response = await fetch("https://lingering-dream-748d.fuyrenoiu.workers.dev/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
