@@ -1,5 +1,6 @@
 import { useState } from "react";
 import StopTimeline from "./Timeline";
+import RouteMap from "./RouteMap";
 
 export default function RouteCard({ route }) {
   const [expanded, setExpanded] = useState(false);
@@ -46,8 +47,13 @@ export default function RouteCard({ route }) {
       </div>
 
       {expanded && (
-        <div style={{ borderTop:`1px solid ${c}15`, padding:"4px 18px 16px" }}>
-          <StopTimeline stops={route.stops} color={c} />
+        <div style={{ borderTop:`1px solid ${c}15`, padding:"0 0 16px" }}>
+          <div style={{ margin:"0 0 12px" }}>
+            <RouteMap stops={route.stops} color={c} />
+          </div>
+          <div style={{ padding:"0 18px" }}>
+            <StopTimeline stops={route.stops} color={c} />
+          </div>
         </div>
       )}
     </div>

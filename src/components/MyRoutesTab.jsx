@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import SectionLabel from "./SectionLabel";
 import StopTimeline from "./Timeline";
+import RouteMap from "./RouteMap";
 
 export default function MyRoutesTab() {
   const [items, setItems] = useState(null); // null = loading, [] = empty
@@ -81,6 +82,9 @@ export default function MyRoutesTab() {
                 <span>{route.distance}</span><span style={{ opacity:0.3 }}>·</span><span>{savedAt}</span>
               </div>
               <div style={{ padding:"2px 16px 8px", marginTop:4 }}>
+                <div style={{ marginBottom:10 }}>
+                  <RouteMap stops={route.stops || []} color={c} />
+                </div>
                 <StopTimeline stops={route.stops || []} color={c} />
               </div>
               <div style={{ display:"flex", gap:8, justifyContent:"flex-end", padding:"0 16px 14px" }}>
